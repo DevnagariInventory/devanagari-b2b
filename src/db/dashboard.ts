@@ -14,10 +14,10 @@ export async function getDashboard() {
     await Promise.all([
       db
         .select({
-          revenue: sql<number>`coalesce(sum(${invoices.total} - ${invoices.creditedAmount}), 0)`.mapWith(Number),
+          revenue: sql<number>`coalesce(sum(${invoices.total}), 0)`.mapWith(Number),
           orders: count(),
-          todays: sql<number>`coalesce(sum(case when ${invoices.date} = ${t} then ${invoices.total} - ${invoices.creditedAmount} end), 0)`.mapWith(Number),
-          monthly: sql<number>`coalesce(sum(case when ${invoices.date} >= ${monthStart} and ${invoices.date} <= ${t} then ${invoices.total} - ${invoices.creditedAmount} end), 0)`.mapWith(Number),
+          todays: sql<number>`coalesce(sum(case when ${invoices.date} = ${t} then ${invoices.total} end), 0)`.mapWith(Number),
+          monthly: sql<number>`coalesce(sum(case when ${invoices.date} >= ${monthStart} and ${invoices.date} <= ${t} then ${invoices.total} end), 0)`.mapWith(Number),
         })
         .from(invoices),
       db.select({ n: count() }).from(customers),
@@ -28,7 +28,7 @@ export async function getDashboard() {
         .where(and(eq(products.status, "active"), sql`${products.stock} <= ${products.lowStockAt}`)),
       // Last 14 days; days with no sales are filled in below so the line has no gaps.
       db
-        .select({ date: invoices.date, total: sql<number>`sum(${invoices.total} - ${invoices.creditedAmount})`.mapWith(Number) })
+        .select({ date: invoices.date, total: sql<number>`sum(${invoices.total})`.mapWith(Number) })
         .from(invoices)
         .where(and(gte(invoices.date, start), lte(invoices.date, t)))
         .groupBy(invoices.date),

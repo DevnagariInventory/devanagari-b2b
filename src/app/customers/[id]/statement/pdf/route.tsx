@@ -51,8 +51,8 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }
         ]),
       ]}
       totals={[
-        { label: "Total billed / refunded", value: formatINR(s.totalDebit) },
-        { label: "Total received / credited", value: formatINR(s.totalCredit) },
+        { label: "Total billed", value: formatINR(s.totalDebit) },
+        { label: "Total received", value: formatINR(s.totalCredit) },
         { label: "Closing balance", value: formatINR(s.closing), big: true },
       ]}
       notes={[{ title: "Note", text: "A positive balance means the amount is due to us. Please ignore if already paid." }]}

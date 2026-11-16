@@ -93,7 +93,7 @@ export default function DocViewer({ backHref, title, pdfUrl, summary, badge, wha
           ref={frame}
           title={title}
           src={`${pdfUrl}#toolbar=0&navpanes=0&view=FitH`}
-          className="block h-[calc(100vh-190px)] min-h-[600px] w-full rounded-lg border border-border bg-white shadow-lg"
+          className="block h-[70vh] min-h-[420px] sm:h-[calc(100vh-190px)] sm:min-h-[600px] w-full rounded-lg border border-border bg-white shadow-lg"
         />
         <aside className="space-y-4 xl:max-w-[420px]">
           <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">

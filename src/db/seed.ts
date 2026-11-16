@@ -20,7 +20,7 @@ async function main() {
     // One statement empties every table and restarts the ids from 1.
     await db.execute(sql`truncate table
       audit_logs, print_orders, printing_presses, royalty_payments, payments, stock_movements, product_images,
-      credit_note_items, credit_notes, challans, quotation_items, quotations,
+      quotation_items, quotations,
       invoice_items, invoices, expenses, products, customers, authors, categories, company
       restart identity cascade`);
   } else {

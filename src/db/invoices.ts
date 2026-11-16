@@ -1,6 +1,6 @@
 import { asc, desc, eq, like } from "drizzle-orm";
 import { db } from "./index";
-import { company, creditNotes, customers, invoiceItems, invoices, payments, products, type Company } from "./schema";
+import { company, customers, invoiceItems, invoices, payments, products, type Company } from "./schema";
 import type { Runner } from "./stock";
 
 const round2 = (n: number) => Math.round(n * 100) / 100;
@@ -26,7 +26,6 @@ export async function nextInvoiceNumber(runner: Runner = db): Promise<string> {
 
 export type InvoiceStatus = "paid" | "partial" | "pending";
 
-/** `total` is what the customer actually owes: the invoice total minus any credit notes. */
 export function invoiceStatus(total: number, paid: number): InvoiceStatus {
   if (paid >= total - 0.004) return "paid";
   if (paid > 0) return "partial";
@@ -41,14 +40,13 @@ export async function listInvoices() {
       date: invoices.date,
       total: invoices.total,
       paidAmount: invoices.paidAmount,
-      creditedAmount: invoices.creditedAmount,
       customerId: invoices.customerId,
       customerName: customers.name,
     })
     .from(invoices)
     .innerJoin(customers, eq(customers.id, invoices.customerId))
     .orderBy(desc(invoices.date), desc(invoices.id));
-  return rows.map((r) => ({ ...r, status: invoiceStatus(r.total - r.creditedAmount, r.paidAmount) }));
+  return rows.map((r) => ({ ...r, status: invoiceStatus(r.total, r.paidAmount) }));
 }
 
 export type InvoiceListRow = Awaited<ReturnType<typeof listInvoices>>[number];
@@ -81,8 +79,6 @@ export async function getInvoiceDetail(id: number) {
   const gst = round2(items.reduce((s, i) => s + (i.amount * i.gstPercent) / 100, 0));
   const grandTotal = round2(subtotal + gst);
   const paid = inv.invoices.paidAmount;
-  const credited = inv.invoices.creditedAmount;
-  const netTotal = round2(grandTotal - credited);
 
   const [savedCompany] = await db.select().from(company).where(eq(company.id, 1));
   const biz: Company = savedCompany ?? {
@@ -101,20 +97,13 @@ export async function getInvoiceDetail(id: number) {
     number: inv.invoices.number,
     date: inv.invoices.date,
     paymentMode: inv.invoices.paymentMode,
-    status: invoiceStatus(netTotal, paid),
+    status: invoiceStatus(grandTotal, paid),
     items,
     subtotal,
     gst,
     grandTotal,
     paid,
-    credited,
-    netTotal,
-    creditNotes: await db
-      .select({ id: creditNotes.id, number: creditNotes.number, date: creditNotes.date, total: creditNotes.total })
-      .from(creditNotes)
-      .where(eq(creditNotes.invoiceId, id))
-      .orderBy(asc(creditNotes.id)),
-    balance: round2(Math.max(netTotal - paid, 0)),
+    balance: round2(Math.max(grandTotal - paid, 0)),
     customer: inv.customers,
     company: biz,
   };

@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { AlertTriangle, BookOpen, Boxes, IndianRupee, PackageX, Search, SlidersHorizontal } from "lucide-react";
+import { AlertTriangle, BookOpen, Boxes, Download, IndianRupee, PackageX, Search, SlidersHorizontal } from "lucide-react";
 import Modal from "@/components/ui/Modal";
 import DataForm, { type FieldDef } from "@/components/ui/DataForm";
 import PageHeader, { outlineBtn, searchCls, selectCls } from "@/components/ui/PageHeader";
@@ -33,18 +33,33 @@ const fields: FieldDef<keyof StockAdjustRaw>[] = [
   { key: "note", label: "Note", placeholder: "e.g. Damaged in transit" },
 ];
 
-type Tab = "stock" | "history";
+type Tab = "stock" | "category" | "history";
+
+// A spreadsheet-friendly copy of the stock list (opens in Excel).
+function downloadCsv(rows: ProductRow[]) {
+  const cell = (v: string | number) => `"${String(v).replace(/"/g, '""')}"`;
+  const head = ["Book", "SKU", "ISBN", "Category", "Stock", "Alert at", "Price", "Value"];
+  const lines = rows.map((p) => [p.name, p.sku, p.isbn, p.categoryName, p.stock, p.lowStockAt, p.price, Math.round(p.stock * p.price * 100) / 100].map(cell).join(","));
+  const blob = new Blob(["\uFEFF" + [head.map(cell).join(","), ...lines].join("\r\n")], { type: "text/csv;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "stock-list.csv";
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
 
 export default function InventoryView({
   products,
   movements,
   initialQuery,
+  initialTab,
 }: {
   products: ProductRow[];
   movements: MovementRow[];
   initialQuery: string;
+  initialTab: Tab;
 }) {
-  const [tab, setTab] = useState<Tab>("stock");
+  const [tab, setTab] = useState<Tab>(initialTab);
   const [query, setQuery] = useState(initialQuery);
   const [level, setLevel] = useState("");
   const [moveType, setMoveType] = useState("");
@@ -59,6 +74,20 @@ export default function InventoryView({
       low: active.filter((p) => p.stock > 0 && p.stock <= p.lowStockAt).length,
       out: active.filter((p) => p.stock === 0).length,
     };
+  }, [products]);
+
+  const byCategory = useMemo(() => {
+    const map = new Map<string, { name: string; titles: number; units: number; value: number; low: number; out: number }>();
+    for (const p of products) {
+      const row = map.get(p.categoryName) ?? { name: p.categoryName, titles: 0, units: 0, value: 0, low: 0, out: 0 };
+      row.titles += 1;
+      row.units += p.stock;
+      row.value += p.stock * p.price;
+      if (p.status === "active" && p.stock === 0) row.out += 1;
+      else if (p.status === "active" && p.stock <= p.lowStockAt) row.low += 1;
+      map.set(p.categoryName, row);
+    }
+    return [...map.values()].sort((a, b) => b.value - a.value);
   }, [products]);
 
   const q = query.trim().toLowerCase();
@@ -78,7 +107,14 @@ export default function InventoryView({
 
   return (
     <div className="space-y-6">
-      <PageHeader eyebrow="Stock" title="Inventory" />
+      <PageHeader eyebrow="Stock" title="Inventory">
+        {tab === "stock" && (
+          <button onClick={() => downloadCsv(shown)} disabled={shown.length === 0} className={outlineBtn}>
+            <Download className="h-5 w-5" />
+            Download CSV
+          </button>
+        )}
+      </PageHeader>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         <StatCard label="Titles" value={String(stats.titles)} icon={BookOpen} tone="blue" />
@@ -89,8 +125,8 @@ export default function InventoryView({
       </div>
 
       <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
-        <div role="tablist" className="mb-4 flex gap-1 border-b border-border">
-          {([["stock", "Stock levels"], ["history", "Movement history"]] as const).map(([k, label]) => (
+        <div role="tablist" className="mb-4 flex gap-1 overflow-x-auto whitespace-nowrap border-b border-border">
+          {([["stock", "Stock levels"], ["category", "By category"], ["history", "Movement history"]] as const).map(([k, label]) => (
             <button
               key={k}
               role="tab"
@@ -105,7 +141,7 @@ export default function InventoryView({
           ))}
         </div>
 
-        <div className="mb-4 flex flex-wrap gap-3">
+        <div className={`mb-4 flex flex-wrap gap-3 ${tab === "category" ? "hidden" : ""}`}>
           <div className="relative min-w-[240px] flex-1 sm:max-w-[440px]">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
             <input
@@ -136,8 +172,48 @@ export default function InventoryView({
         </div>
 
         <div className="overflow-x-auto">
-          {tab === "stock" ? (
-            <table className="w-full min-w-[860px] text-left text-base">
+          {tab === "category" ? (
+            <table className="rtable w-full min-w-[640px] text-left text-base">
+              <thead>
+                <tr className="bg-muted text-sm uppercase tracking-wider text-muted-foreground">
+                  <th className="rounded-l-lg px-4 py-3 font-medium">Category</th>
+                  <th className="px-4 py-3 text-right font-medium">Titles</th>
+                  <th className="px-4 py-3 text-right font-medium">Units in stock</th>
+                  <th className="px-4 py-3 text-right font-medium">Low</th>
+                  <th className="px-4 py-3 text-right font-medium">Out</th>
+                  <th className="rounded-r-lg px-4 py-3 text-right font-medium">Stock value</th>
+                </tr>
+              </thead>
+              <tbody>
+                {byCategory.map((c) => (
+                  <tr key={c.name} className="border-b border-border last:border-0 hover:bg-muted/50">
+                    <td className="px-4 py-3 font-semibold">{c.name}</td>
+                    <td className="px-4 py-3 text-right">{c.titles}</td>
+                    <td className="px-4 py-3 text-right">{c.units.toLocaleString("en-IN")}</td>
+                    <td className={`px-4 py-3 text-right ${c.low ? "font-semibold text-amber-600" : "text-muted-foreground"}`}>{c.low}</td>
+                    <td className={`px-4 py-3 text-right ${c.out ? "font-semibold text-red-600" : "text-muted-foreground"}`}>{c.out}</td>
+                    <td className="whitespace-nowrap px-4 py-3 text-right font-semibold">{formatINR(c.value)}</td>
+                  </tr>
+                ))}
+                {byCategory.length > 0 && (
+                  <tr className="bg-muted/40 font-semibold">
+                    <td className="px-4 py-3">Total</td>
+                    <td className="px-4 py-3 text-right">{stats.titles}</td>
+                    <td className="px-4 py-3 text-right">{stats.units.toLocaleString("en-IN")}</td>
+                    <td className="px-4 py-3 text-right">{stats.low}</td>
+                    <td className="px-4 py-3 text-right">{stats.out}</td>
+                    <td className="whitespace-nowrap px-4 py-3 text-right">{formatINR(stats.value)}</td>
+                  </tr>
+                )}
+                {byCategory.length === 0 && (
+                  <tr>
+                    <td colSpan={6} className="px-4 py-12 text-center text-muted-foreground">No books yet.</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          ) : tab === "stock" ? (
+            <table className="rtable w-full min-w-[860px] text-left text-base">
               <thead>
                 <tr className="bg-muted text-sm uppercase tracking-wider text-muted-foreground">
                   {["Book", "SKU", "Category", "Stock", "Alert at", "Value"].map((h) => (
@@ -180,7 +256,7 @@ export default function InventoryView({
               </tbody>
             </table>
           ) : (
-            <table className="w-full min-w-[820px] text-left text-base">
+            <table className="rtable w-full min-w-[820px] text-left text-base">
               <thead>
                 <tr className="bg-muted text-sm uppercase tracking-wider text-muted-foreground">
                   <th className="rounded-l-lg px-4 py-3 font-medium">Date</th>

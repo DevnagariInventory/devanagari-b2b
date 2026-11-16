@@ -158,18 +158,6 @@ export default function InvoiceDocument({ invoice, qrDataUrl }: { invoice: Invoi
               <Text style={{ fontWeight: 700, fontSize: 10.5 }}>Grand Total</Text>
               <Text style={{ fontWeight: 700, fontSize: 16, lineHeight: 1.3 }}>{formatINR(invoice.grandTotal)}</Text>
             </View>
-            {invoice.credited > 0 ? (
-              <>
-                <View style={s.totalRow}>
-                  <Text style={s.small}>Less: credit notes (returns)</Text>
-                  <Text style={{ fontSize: 10 }}>-{formatINR(invoice.credited)}</Text>
-                </View>
-                <View style={s.totalRow}>
-                  <Text style={{ fontWeight: 700, fontSize: 10 }}>Net payable</Text>
-                  <Text style={{ fontWeight: 700, fontSize: 10 }}>{formatINR(invoice.netTotal)}</Text>
-                </View>
-              </>
-            ) : null}
           </View>
         </View>
 

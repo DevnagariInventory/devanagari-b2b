@@ -21,8 +21,6 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
         grandTotal: invoice.grandTotal,
         paid: invoice.paid,
         balance: invoice.balance,
-        credited: invoice.credited,
-        creditNotes: invoice.creditNotes,
         customer: { name: invoice.customer.name, mobile: invoice.customer.mobile, email: invoice.customer.email },
         companyName: invoice.company.name,
         payments: invoice.payments.map((p) => ({

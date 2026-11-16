@@ -12,7 +12,7 @@ export default function PageHeader({
     <div className="flex flex-wrap items-end justify-between gap-4">
       <div>
         <p className="text-sm font-medium uppercase tracking-[0.15em] text-muted-foreground">{eyebrow}</p>
-        <h1 className="mt-1 text-3xl font-semibold">{title}</h1>
+        <h1 className="mt-1 text-2xl font-semibold sm:text-3xl">{title}</h1>
       </div>
       {children && <div className="flex flex-wrap items-center gap-3">{children}</div>}
     </div>

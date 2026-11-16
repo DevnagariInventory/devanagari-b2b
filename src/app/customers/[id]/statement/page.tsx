@@ -70,13 +70,13 @@ export default async function StatementPage({
 
       <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[720px] text-left text-base">
+          <table className="rtable w-full min-w-[720px] text-left text-base">
             <thead>
               <tr className="bg-muted text-sm uppercase tracking-wider text-muted-foreground">
                 <th className="rounded-l-lg px-4 py-3 font-medium">Date</th>
                 <th className="px-4 py-3 font-medium">Particulars</th>
-                <th className="px-4 py-3 text-right font-medium">Billed / refunded</th>
-                <th className="px-4 py-3 text-right font-medium">Received / credited</th>
+                <th className="px-4 py-3 text-right font-medium">Billed</th>
+                <th className="px-4 py-3 text-right font-medium">Received</th>
                 <th className="rounded-r-lg px-4 py-3 text-right font-medium">Balance</th>
               </tr>
             </thead>

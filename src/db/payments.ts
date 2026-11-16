@@ -36,9 +36,9 @@ export async function listOutstanding() {
       number: i.number,
       customerName: i.customerName,
       date: i.date,
-      total: round2(i.total - i.creditedAmount),
+      total: round2(i.total),
       paid: i.paidAmount,
-      balance: round2(i.total - i.creditedAmount - i.paidAmount),
+      balance: round2(i.total - i.paidAmount),
       ageDays: Math.max(0, Math.round((now - new Date(i.date + "T00:00:00Z").getTime()) / 86_400_000)),
     }))
     .filter((i) => i.balance > 0)
@@ -48,12 +48,10 @@ export async function listOutstanding() {
 export type OutstandingRow = Awaited<ReturnType<typeof listOutstanding>>[number];
 
 export async function paymentStats() {
-  const [all, outstanding] = await Promise.all([listPayments(), listOutstanding()]);
+  const all = await listPayments();
   const start = monthStart();
   return {
     totalReceived: round2(all.reduce((s, p) => s + p.amount, 0)),
     thisMonth: round2(all.filter((p) => p.date >= start).reduce((s, p) => s + p.amount, 0)),
-    outstanding: round2(outstanding.reduce((s, i) => s + i.balance, 0)),
-    overdueCount: outstanding.filter((i) => i.ageDays > 30).length,
   };
 }

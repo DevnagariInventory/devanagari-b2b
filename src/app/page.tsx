@@ -13,10 +13,10 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-end justify-between">
+      <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="text-sm font-medium uppercase tracking-[0.15em] text-muted-foreground">Overview</p>
-          <h1 className="mt-1 text-3xl font-semibold">Dashboard</h1>
+          <h1 className="mt-1 text-2xl font-semibold sm:text-3xl">Dashboard</h1>
         </div>
         <Link
           href="/invoices/new"
@@ -44,7 +44,7 @@ export default async function DashboardPage() {
         <StatCard label="Avg Order" value={formatINR(stats.avgOrder)} icon={TrendingUp} tone="purple" />
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-[1fr_452px]">
+      <div className="grid gap-4 xl:grid-cols-[1fr_452px]">
         <SalesTrend data={salesTrend} />
         <TopSellingBooks books={topSellingBooks} />
       </div>

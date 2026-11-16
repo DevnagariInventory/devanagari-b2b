@@ -26,7 +26,6 @@ export const REPORT_TYPES = {
   gst: "GST summary",
   bestsellers: "Best-selling books",
   outstanding: "Outstanding by customer",
-  stock: "Stock valuation",
   expenses: "Expenses",
   royalty: "Author royalty",
 } as const;
@@ -39,16 +38,16 @@ export async function getReport(type: ReportType, from: string, to: string): Pro
   switch (type) {
     case "sales": {
       const rows = await query<{
-        date: string; number: string; customer: string; subtotal: number; gst: number; total: number; credited: number; received: number;
+        date: string; number: string; customer: string; subtotal: number; gst: number; total: number; received: number;
       }>(sql`
         select i.date as date, i.number as number, c.name as customer,
           coalesce((select sum(line_total) from invoice_items where invoice_id = i.id), 0)::float8 as subtotal,
           coalesce((select sum(line_total * gst_percent / 100) from invoice_items where invoice_id = i.id), 0)::float8 as gst,
-          i.total as total, i.credited_amount as credited, i.paid_amount as received
+          i.total as total, i.paid_amount as received
         from invoices i join customers c on c.id = i.customer_id
         where i.date between ${from} and ${to}
         order by i.date, i.id`);
-      const data = rows.map((r) => ({ ...r, subtotal: round2(r.subtotal), gst: round2(r.gst), credited: round2(r.credited), balance: round2(r.total - r.credited - r.received) }));
+      const data = rows.map((r) => ({ ...r, subtotal: round2(r.subtotal), gst: round2(r.gst), balance: round2(r.total - r.received) }));
       return {
         title: REPORT_TYPES.sales,
         description: "Every invoice in the period, with GST and what is still unpaid.",
@@ -60,13 +59,12 @@ export async function getReport(type: ReportType, from: string, to: string): Pro
           { key: "subtotal", label: "Subtotal", type: "money" },
           { key: "gst", label: "GST", type: "money" },
           { key: "total", label: "Total", type: "money" },
-          { key: "credited", label: "Credit notes", type: "money" },
           { key: "received", label: "Received", type: "money" },
           { key: "balance", label: "Balance", type: "money" },
         ],
         rows: data,
         totals: {
-          subtotal: sum(data, "subtotal"), gst: sum(data, "gst"), total: sum(data, "total"), credited: sum(data, "credited"),
+          subtotal: sum(data, "subtotal"), gst: sum(data, "gst"), total: sum(data, "total"),
           received: sum(data, "received"), balance: sum(data, "balance"),
         },
       };
@@ -118,11 +116,11 @@ export async function getReport(type: ReportType, from: string, to: string): Pro
 
     case "outstanding": {
       const rows = (await query<{ customer: string; mobile: string; invoices: number; total: number; received: number; oldest: string }>(sql`
-          select c.name as customer, c.mobile as mobile, count(*)::int as invoices, sum(i.total - i.credited_amount)::float8 as total,
+          select c.name as customer, c.mobile as mobile, count(*)::int as invoices, sum(i.total)::float8 as total,
             sum(i.paid_amount)::float8 as received, min(i.date) as oldest
           from invoices i join customers c on c.id = i.customer_id
-          where i.total - i.credited_amount - i.paid_amount > 0.004
-          group by c.id order by sum(i.total - i.credited_amount - i.paid_amount) desc`))
+          where i.total - i.paid_amount > 0.004
+          group by c.id order by sum(i.total - i.paid_amount) desc`))
         .map((r) => ({ ...r, total: round2(r.total), received: round2(r.received), due: round2(r.total - r.received) }));
       return {
         title: REPORT_TYPES.outstanding,
@@ -139,28 +137,6 @@ export async function getReport(type: ReportType, from: string, to: string): Pro
         ],
         rows,
         totals: { invoices: sum(rows, "invoices"), total: sum(rows, "total"), received: sum(rows, "received"), due: sum(rows, "due") },
-      };
-    }
-
-    case "stock": {
-      const rows = (await query<{ name: string; sku: string; category: string; stock: number; price: number }>(sql`
-          select p.name as name, p.sku as sku, c.name as category, p.stock as stock, p.price as price
-          from products p join categories c on c.id = p.category_id order by p.name`))
-        .map((r) => ({ ...r, value: round2(r.stock * r.price) }));
-      return {
-        title: REPORT_TYPES.stock,
-        description: "Current stock valued at selling price, as of today. The date range doesn't apply.",
-        usesRange: false,
-        columns: [
-          { key: "name", label: "Book", type: "text" },
-          { key: "sku", label: "SKU", type: "text" },
-          { key: "category", label: "Category", type: "text" },
-          { key: "stock", label: "Stock", type: "number" },
-          { key: "price", label: "Price", type: "money" },
-          { key: "value", label: "Value", type: "money" },
-        ],
-        rows,
-        totals: { stock: sum(rows, "stock"), value: sum(rows, "value") },
       };
     }
 

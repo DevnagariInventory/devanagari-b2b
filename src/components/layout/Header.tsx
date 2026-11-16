@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Moon, Search, Sun } from "lucide-react";
 import { formatLongDate } from "@/lib/format";
 import UserMenu from "./UserMenu";
+import MobileNav from "./MobileNav";
 import type { SearchHit } from "@/app/api/search/route";
 
 export default function Header({ userName, role }: { userName: string; role: "admin" | "staff" }) {
@@ -88,8 +89,9 @@ export default function Header({ userName, role }: { userName: string; role: "ad
   const showPanel = open && query.trim().length >= 2;
 
   return (
-    <header className="sticky top-0 z-10 flex h-[68px] items-center justify-between gap-4 border-b border-border bg-card/90 px-8 backdrop-blur">
-      <div ref={box} className="relative w-full max-w-[576px]">
+    <header className="sticky top-0 z-10 flex h-[68px] items-center justify-between gap-3 border-b border-border bg-card/90 px-4 backdrop-blur sm:gap-4 sm:px-6 lg:px-8">
+      <MobileNav role={role} />
+      <div ref={box} className="relative min-w-0 flex-1 sm:max-w-[576px]">
         <Search className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
         <input
           type="search"
@@ -103,7 +105,7 @@ export default function Header({ userName, role }: { userName: string; role: "ad
           role="combobox"
           aria-expanded={showPanel}
           aria-controls="global-search-results"
-          placeholder="Search customers, books, invoice numbers, mobile..."
+          placeholder="Search books, customers, invoices..."
           className="h-11 w-full rounded-lg border border-border bg-card pl-10 pr-3 text-base outline-none placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20"
         />
         {showPanel && (
@@ -141,11 +143,11 @@ export default function Header({ userName, role }: { userName: string; role: "ad
           </div>
         )}
       </div>
-      <div className="flex shrink-0 items-center gap-5">
+      <div className="flex shrink-0 items-center gap-2 sm:gap-5">
         <button
           onClick={toggleTheme}
           aria-label="Toggle theme"
-          className="text-muted-foreground transition-colors hover:text-foreground"
+          className="flex h-10 w-10 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground sm:h-auto sm:w-auto sm:hover:bg-transparent"
         >
           {dark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
         </button>

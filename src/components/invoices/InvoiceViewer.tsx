@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
-  ArrowLeft, Copy, Download, ExternalLink, IndianRupee, Mail, MessageCircle, Pencil, Printer, Receipt, Trash2, Truck, Undo2,
+  ArrowLeft, Copy, Download, IndianRupee, Mail, MessageCircle, Pencil, Printer, Receipt, Trash2,
 } from "lucide-react";
 import Modal from "@/components/ui/Modal";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
@@ -26,8 +26,6 @@ export interface ViewerInvoice {
   grandTotal: number;
   paid: number;
   balance: number;
-  credited: number;
-  creditNotes: { id: number; number: string; date: string; total: number }[];
   customer: { name: string; mobile: string; email: string };
   companyName: string;
   payments: { id: number; amount: number; date: string; mode: string; reference: string; note: string }[];
@@ -67,7 +65,7 @@ export default function InvoiceViewer({ invoice: inv }: { invoice: ViewerInvoice
   const message =
     `Hello ${inv.customer.name},\n` +
     `Invoice ${inv.number} dated ${formatDate(inv.date)} from ${inv.companyName}.\n` +
-    `Total: ${formatINR(inv.grandTotal - inv.credited)}  Paid: ${formatINR(inv.paid)}  Balance: ${formatINR(inv.balance)}\n` +
+    `Total: ${formatINR(inv.grandTotal)}  Paid: ${formatINR(inv.paid)}  Balance: ${formatINR(inv.balance)}\n` +
     `Thank you for your business.`;
   const whatsappHref = `https://wa.me/${whatsappNumber(inv.customer.mobile)}?text=${encodeURIComponent(message)}`;
   const mailHref =
@@ -117,22 +115,10 @@ export default function InvoiceViewer({ invoice: inv }: { invoice: ViewerInvoice
             <Mail className="h-5 w-5" />
             Email
           </a>
-          <Link href={`/credit-notes/new?invoice=${inv.id}`} className={outlineBtn}>
-            <Undo2 className="h-5 w-5" />
-            Return / Credit note
-          </Link>
-          <Link href={`/challans/new?invoice=${inv.id}`} className={outlineBtn}>
-            <Truck className="h-5 w-5" />
-            Delivery challan
-          </Link>
           <Link href={`/invoices/new?from=${inv.id}`} className={outlineBtn}>
             <Copy className="h-5 w-5" />
             Duplicate
           </Link>
-          <a href={pdfUrl} target="_blank" rel="noreferrer" className={outlineBtn}>
-            <ExternalLink className="h-5 w-5" />
-            Open
-          </a>
           <a href={`${pdfUrl}?download=1`} className={outlineBtn}>
             <Download className="h-5 w-5" />
             Download
@@ -153,7 +139,7 @@ export default function InvoiceViewer({ invoice: inv }: { invoice: ViewerInvoice
           ref={frame}
           title={`Invoice ${inv.number}`}
           src={`${pdfUrl}#toolbar=0&navpanes=0&view=FitH`}
-          className="block h-[calc(100vh-190px)] min-h-[600px] w-full rounded-lg border border-border bg-white shadow-lg"
+          className="block h-[70vh] min-h-[420px] sm:h-[calc(100vh-190px)] sm:min-h-[600px] w-full rounded-lg border border-border bg-white shadow-lg"
         />
 
         <aside className="space-y-4 xl:max-w-[420px]">
@@ -170,12 +156,6 @@ export default function InvoiceViewer({ invoice: inv }: { invoice: ViewerInvoice
                 <dt className="text-muted-foreground">Total</dt>
                 <dd className="font-semibold">{formatINR(inv.grandTotal)}</dd>
               </div>
-              {inv.credited > 0 && (
-                <div className="flex justify-between">
-                  <dt className="text-muted-foreground">Returned (credit notes)</dt>
-                  <dd>-{formatINR(inv.credited)}</dd>
-                </div>
-              )}
               <div className="flex justify-between">
                 <dt className="text-muted-foreground">Received</dt>
                 <dd>{formatINR(inv.paid)}</dd>
@@ -188,23 +168,6 @@ export default function InvoiceViewer({ invoice: inv }: { invoice: ViewerInvoice
               </div>
             </dl>
           </div>
-
-          {inv.creditNotes.length > 0 && (
-            <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
-              <h2 className="text-lg font-semibold">Credit notes</h2>
-              <ul className="mt-3 divide-y divide-border">
-                {inv.creditNotes.map((c) => (
-                  <li key={c.id} className="flex items-center justify-between gap-3 py-3">
-                    <Link href={`/credit-notes/${c.id}`} className="font-semibold hover:text-primary">
-                      {c.number}
-                    </Link>
-                    <span className="text-sm text-muted-foreground">{formatDate(c.date)}</span>
-                    <span className="font-semibold">{formatINR(c.total)}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
 
           <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
             <h2 className="text-lg font-semibold">Payments</h2>
@@ -269,7 +232,7 @@ export default function InvoiceViewer({ invoice: inv }: { invoice: ViewerInvoice
         message={
           <>
             Delete <span className="font-semibold text-foreground">{inv.number}</span>? Its payments are removed and the
-            books are returned to stock. This cannot be undone. (Invoices with credit notes cannot be deleted.)
+            books are returned to stock. This cannot be undone.
           </>
         }
         onConfirm={async () => {

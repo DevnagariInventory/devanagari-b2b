@@ -43,8 +43,8 @@ export async function getAnalytics(from: string, to: string) {
   ] = await Promise.all([
     db
       .select({
-        revenue: sql<number>`coalesce(sum(${invoices.total} - ${invoices.creditedAmount}), 0)`.mapWith(Number),
-        outstanding: sql<number>`coalesce(sum(${invoices.total} - ${invoices.creditedAmount} - ${invoices.paidAmount}), 0)`.mapWith(Number),
+        revenue: sql<number>`coalesce(sum(${invoices.total}), 0)`.mapWith(Number),
+        outstanding: sql<number>`coalesce(sum(${invoices.total} - ${invoices.paidAmount}), 0)`.mapWith(Number),
       })
       .from(invoices)
       .where(inRange),
@@ -57,7 +57,7 @@ export async function getAnalytics(from: string, to: string) {
       .from(products)
       .where(and(gt(products.stock, 0), notInArray(products.id, soldIds))),
     db
-      .select({ name: invoices.paymentMode, value: sql<number>`sum(${invoices.total} - ${invoices.creditedAmount})`.mapWith(Number) })
+      .select({ name: invoices.paymentMode, value: sql<number>`sum(${invoices.total})`.mapWith(Number) })
       .from(invoices)
       .where(inRange)
       .groupBy(invoices.paymentMode),
@@ -82,7 +82,7 @@ export async function getAnalytics(from: string, to: string) {
 
     // ---------- Profit tab ----------
     rows<{ m: string; v: number }>(
-      sql`select substr(date, 1, 7) as m, sum(total - credited_amount)::float8 as v from invoices where date between ${from} and ${to} group by 1`
+      sql`select substr(date, 1, 7) as m, sum(total)::float8 as v from invoices where date between ${from} and ${to} group by 1`
     ),
     rows<{ m: string; v: number }>(
       sql`select substr(date, 1, 7) as m, sum(amount)::float8 as v from expenses where date between ${from} and ${to} group by 1`
@@ -109,7 +109,7 @@ export async function getAnalytics(from: string, to: string) {
 
     // ---------- Customers tab ----------
     rows<{ name: string; orders: number; revenue: number; due: number }>(sql`
-      select c.name as name, count(*)::int as orders, sum(i.total - i.credited_amount)::float8 as revenue, sum(i.total - i.credited_amount - i.paid_amount)::float8 as due
+      select c.name as name, count(*)::int as orders, sum(i.total)::float8 as revenue, sum(i.total - i.paid_amount)::float8 as due
       from invoices i join customers c on c.id = i.customer_id
       where i.date between ${from} and ${to}
       group by c.id order by 3 desc limit 10`),
@@ -120,14 +120,14 @@ export async function getAnalytics(from: string, to: string) {
 
     // ---------- Operations tab ----------
     row<{ n: number; total: number; paid: number }>(
-      sql`select count(*)::int as n, coalesce(sum(total - credited_amount), 0)::float8 as total, coalesce(sum(paid_amount), 0)::float8 as paid from invoices where date between ${from} and ${to}`
+      sql`select count(*)::int as n, coalesce(sum(total), 0)::float8 as total, coalesce(sum(paid_amount), 0)::float8 as paid from invoices where date between ${from} and ${to}`
     ),
     rows<{ month: string; amount: number }>(
       sql`select substr(date, 1, 7) as month, sum(amount)::float8 as amount from payments where date between ${from} and ${to} group by 1 order by 1`
     ),
     // Unpaid balance by how old the invoice is, as of today.
     rows<{ age: number; due: number }>(
-      sql`select (${today()}::date - date::date)::int as age, (total - credited_amount - paid_amount)::float8 as due from invoices where total - credited_amount - paid_amount > 0.004`
+      sql`select (${today()}::date - date::date)::int as age, (total - paid_amount)::float8 as due from invoices where total - paid_amount > 0.004`
     ),
     row<{ orders: number; copies: number }>(
       sql`select count(*)::int as orders, coalesce(sum(quantity), 0)::int as copies from print_orders where status in ('ordered', 'printing')`

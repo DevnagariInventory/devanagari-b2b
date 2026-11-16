@@ -44,7 +44,7 @@ export async function moveStock(
  * Without this, two people saving at the same moment would both get the same number.
  * The lock is released automatically when the transaction ends.
  */
-const LOCK_KEYS = { invoice: 71001, print_order: 71002, credit_note: 71003, quotation: 71004, challan: 71005, first_user: 71006 } as const;
+const LOCK_KEYS = { invoice: 71001, print_order: 71002, quotation: 71004, first_user: 71006 } as const;
 export async function lockNumbering(tx: Runner, key: keyof typeof LOCK_KEYS) {
   await tx.execute(sql`select pg_advisory_xact_lock(${LOCK_KEYS[key]})`);
 }

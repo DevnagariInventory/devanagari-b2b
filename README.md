@@ -27,7 +27,7 @@ To create the very first admin (or recover access), run `npm run create-admin --
 random password. Roles:
 
 - **Admin**: everything.
-- **Staff**: billing, quotations, returns, challans, payments, customers, books, authors, categories and stock. Staff
+- **Staff**: billing, quotations, payments, customers, books, authors, categories and stock. Staff
   cannot delete records or open Analytics, Royalty, Expenses, Printing, Reports, Audit Logs, Settings or Users.
 
 Five wrong passwords lock an account for 15 minutes. Changing a password, role or switching someone off signs them
@@ -42,18 +42,15 @@ out everywhere at once. If you deploy the app, set `AUTH_SECRET` (and the other 
 | Products       | Storefront-style catalog (grid or list), full product pages with photos, specs, stock history        |
 | Quotations     | Quote a customer, edit it, send it, then convert it to an invoice in one click (stock moves only then) |
 | Invoices       | Create, edit, duplicate, delete; PDF, thermal receipt, print, WhatsApp and email; record payments    |
-| Credit Notes   | Sales returns against an invoice: books go back to stock (or not, if damaged), dues drop, refunds are recorded, PDF |
-| Delivery Challans | Dispatch note for an invoice with transporter, vehicle, LR number and packages; PDF               |
-| Receivables    | Who owes what, split into 0-30, 31-60, 61-90 and 90+ days; open a customer for their statement      |
+| Receivables    | Who owes what: by customer (0-30, 31-60, 61-90, 90+ days) or by invoice, with Record payment; open a customer for their statement |
 | Customers      | Directory, a page per customer, and a printable **statement of account** for any date range         |
 | Authors        | Directory, royalty percentage                                                                        |
 | Royalty        | Royalty earned per author on sales, record what has been paid                                        |
-| Inventory      | Stock levels, add/remove/set stock with a note, full movement history                                |
-| Payments       | Outstanding invoices with ageing, payment history                                                    |
+| Inventory      | One page with three views: stock levels (adjust stock, CSV download), totals by category, and the full movement history |
+| Payments       | Every payment received, with a search (new payments are recorded from Receivables)                    |
 | Expenses       | Categorised expenses with filters                                                                    |
-| Printing Press | Presses you print with                                                                               |
-| Print Orders   | Order, start printing, receive (adds to stock and books the printing cost as an expense)            |
-| Reports        | Sales register, GST summary, best sellers, outstanding, stock valuation, expenses, royalty; CSV export |
+| Printing       | One page, two tabs: print orders (order, start printing, receive: adds to stock and books the cost as an expense) and the presses you use |
+| Reports        | Sales register, GST summary, best sellers, outstanding, expenses, royalty; CSV export |
 | Users          | Add people, set Admin or Staff, switch off, reset passwords (admin only)                             |
 | Audit Logs     | Who changed what and when, with filters                                                              |
 | Settings       | Business profile printed on invoices, invoice number prefix, data backup download                |

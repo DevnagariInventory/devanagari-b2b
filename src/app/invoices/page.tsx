@@ -56,7 +56,7 @@ export default async function InvoicesPage({
           )}
         </form>
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[760px] text-left text-base">
+          <table className="rtable w-full min-w-[760px] text-left text-base">
             <thead>
               <tr className="bg-muted text-sm uppercase tracking-wider text-muted-foreground">
                 {["Invoice", "Customer", "Date", "Total", "Paid", "Status"].map((h) => (
@@ -79,9 +79,6 @@ export default async function InvoicesPage({
                   <td className="whitespace-nowrap px-4 py-4">{formatDate(inv.date)}</td>
                   <td className="whitespace-nowrap px-4 py-4 font-semibold">
                     {formatINR(inv.total)}
-                    {inv.creditedAmount > 0 && (
-                      <span className="block text-sm font-normal text-muted-foreground">-{formatINR(inv.creditedAmount)} returned</span>
-                    )}
                   </td>
                   <td className="whitespace-nowrap px-4 py-4">{formatINR(inv.paidAmount)}</td>
                   <td className="px-4 py-4">

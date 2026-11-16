@@ -52,7 +52,7 @@ export default function CustomersView({ customers }: { customers: Customer[] }) 
         </div>
 
         <div className="mt-4 overflow-x-auto">
-          <table className="w-full min-w-[820px] text-left text-base">
+          <table className="rtable w-full min-w-[820px] text-left text-base">
             <thead>
               <tr className="bg-muted text-sm uppercase tracking-wider text-muted-foreground">
                 {["Name", "Mobile", "Email", "City", "GSTIN", "Added"].map((h) => (

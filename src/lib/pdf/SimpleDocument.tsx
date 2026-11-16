@@ -3,7 +3,7 @@ import type { Company } from "@/db/schema";
 import { SANS, SERIF } from "./fonts";
 
 // One A4 template for the "paper" documents that share the invoice look:
-// credit notes, quotations, delivery challans and customer statements.
+// quotations and customer statements.
 
 const INK = "#111827";
 const MUTED = "#6b7280";
@@ -47,11 +47,11 @@ export interface PdfTotal {
 }
 
 export interface SimpleDocumentProps {
-  docLabel: string; // "Credit Note"
+  docLabel: string; // "Quotation"
   number: string;
   company: Company;
   rightLines?: string[];
-  partyLabel: string; // "Credit to"
+  partyLabel: string; // "Quotation for"
   party: { name: string; lines: string[] };
   sideBlock?: { label: string; lines: string[] };
   cols: PdfCol[];

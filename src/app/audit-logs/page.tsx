@@ -69,7 +69,7 @@ export default async function AuditLogsPage({ searchParams }: { searchParams: Pr
         </form>
 
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[720px] text-left text-base">
+          <table className="rtable w-full min-w-[720px] text-left text-base">
             <thead>
               <tr className="bg-muted text-sm uppercase tracking-wider text-muted-foreground">
                 <th className="rounded-l-lg px-4 py-3 font-medium">When</th>

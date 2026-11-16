@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Outfit, Noto_Serif } from "next/font/google";
 import Sidebar from "@/components/layout/Sidebar";
 import Header from "@/components/layout/Header";
+import TableLabels from "@/components/layout/TableLabels";
 import { getUser } from "@/lib/auth/current";
 import "./globals.css";
 
@@ -27,10 +28,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body>
         {user ? (
           <div className="flex min-h-screen">
+            <TableLabels />
             <Sidebar role={user.role} />
             <div className="flex min-w-0 flex-1 flex-col">
               <Header userName={user.name} role={user.role} />
-              <main className="w-full flex-1 px-6 py-8 lg:px-8">{children}</main>
+              <main className="w-full flex-1 px-4 py-5 sm:px-6 sm:py-8 lg:px-8">{children}</main>
             </div>
           </div>
         ) : (

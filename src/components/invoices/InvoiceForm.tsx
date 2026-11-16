@@ -199,8 +199,8 @@ export default function InvoiceForm({ kind = "invoice", invoiceId, number, initi
         </div>
       </div>
 
-      <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
-        <div className="flex items-center justify-between">
+      <div className="rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-6">
+        <div className="flex items-center justify-between gap-3">
           <h2 className="text-lg font-semibold">Items</h2>
           <button
             type="button"
@@ -212,57 +212,61 @@ export default function InvoiceForm({ kind = "invoice", invoiceId, number, initi
           </button>
         </div>
 
-        <div className="mt-4 overflow-x-auto">
-          <div className="min-w-[900px] space-y-3">
-            <div className="grid grid-cols-[minmax(240px,1fr)_80px_110px_80px_80px_120px_40px] gap-2 text-sm font-medium uppercase tracking-wider text-muted-foreground">
-              <span>Book</span>
-              <span>Qty</span>
-              <span>Rate (₹)</span>
-              <span>Disc %</span>
-              <span>GST %</span>
-              <span className="text-right">Amount</span>
-              <span />
-            </div>
+        <div className="mt-4 space-y-3">
+          {/* Column titles: only on wide screens. Below that, every line is its own card with labelled boxes. */}
+          <div className="hidden grid-cols-[minmax(240px,1fr)_80px_110px_80px_80px_120px_40px] gap-2 text-sm font-medium uppercase tracking-wider text-muted-foreground xl:grid">
+            <span>Book</span>
+            <span>Qty</span>
+            <span>Rate (₹)</span>
+            <span>Disc %</span>
+            <span>GST %</span>
+            <span className="text-right">Amount</span>
+            <span />
+          </div>
 
-            {rows.map((r, i) => {
-              const err = (f: keyof InvoiceItemRaw) => errors[itemErrorKey(i, f)];
-              const p = productById.get(Number(r.productId));
-              const available = p ? p.stock + (heldQty[p.id] ?? 0) : null;
-              const amount = computeLine({
-                quantity: num(r.quantity),
-                rate: num(r.rate),
-                discountPercent: num(r.discountPercent),
-                gstPercent: num(r.gstPercent),
-              }).amount;
-              const rowErrors = (["productId", "quantity", "rate", "discountPercent", "gstPercent"] as const)
-                .map(err)
-                .filter(Boolean);
+          {rows.map((r, i) => {
+            const err = (f: keyof InvoiceItemRaw) => errors[itemErrorKey(i, f)];
+            const p = productById.get(Number(r.productId));
+            const available = p ? p.stock + (heldQty[p.id] ?? 0) : null;
+            const amount = computeLine({
+              quantity: num(r.quantity),
+              rate: num(r.rate),
+              discountPercent: num(r.discountPercent),
+              gstPercent: num(r.gstPercent),
+            }).amount;
+            const rowErrors = (["productId", "quantity", "rate", "discountPercent", "gstPercent"] as const)
+              .map(err)
+              .filter(Boolean);
+            const small = "mb-1 block text-xs text-muted-foreground xl:hidden";
 
-              return (
-                <div key={r.key}>
-                  <div className="grid grid-cols-[minmax(240px,1fr)_80px_110px_80px_80px_120px_40px] items-start gap-2">
-                    <div>
-                      <select
-                        value={r.productId}
-                        onChange={(e) => pickProduct(r.key, e.target.value)}
-                        aria-label={`Book for line ${i + 1}`}
-                        className={cellCls(err("productId"))}
-                      >
-                        <option value="">Select a book</option>
-                        {products
-                          .filter((o) => o.active || o.id === Number(r.productId))
-                          .map((o) => (
-                            <option key={o.id} value={o.id}>
-                              {o.name} ({o.sku})
-                            </option>
-                          ))}
-                      </select>
-                      {available !== null && (
-                        <p className={`mt-1 text-sm ${num(r.quantity) > available ? "text-red-500" : "text-muted-foreground"}`}>
-                          In stock: {available}
-                        </p>
-                      )}
-                    </div>
+            return (
+              <div key={r.key} className="rounded-xl border border-border p-3 xl:border-0 xl:p-0">
+                <div className="grid grid-cols-2 items-start gap-2 sm:grid-cols-4 xl:grid-cols-[minmax(240px,1fr)_80px_110px_80px_80px_120px_40px]">
+                  <div className="col-span-2 sm:col-span-4 xl:col-span-1">
+                    <span className={small}>Book</span>
+                    <select
+                      value={r.productId}
+                      onChange={(e) => pickProduct(r.key, e.target.value)}
+                      aria-label={`Book for line ${i + 1}`}
+                      className={cellCls(err("productId"))}
+                    >
+                      <option value="">Select a book</option>
+                      {products
+                        .filter((o) => o.active || o.id === Number(r.productId))
+                        .map((o) => (
+                          <option key={o.id} value={o.id}>
+                            {o.name} ({o.sku})
+                          </option>
+                        ))}
+                    </select>
+                    {available !== null && (
+                      <p className={`mt-1 text-sm ${num(r.quantity) > available ? "text-red-500" : "text-muted-foreground"}`}>
+                        In stock: {available}
+                      </p>
+                    )}
+                  </div>
+                  <label>
+                    <span className={small}>Qty</span>
                     <input
                       inputMode="numeric"
                       value={r.quantity}
@@ -270,6 +274,9 @@ export default function InvoiceForm({ kind = "invoice", invoiceId, number, initi
                       aria-label={`Quantity for line ${i + 1}`}
                       className={cellCls(err("quantity"))}
                     />
+                  </label>
+                  <label>
+                    <span className={small}>Rate (₹)</span>
                     <input
                       inputMode="decimal"
                       value={r.rate}
@@ -277,6 +284,9 @@ export default function InvoiceForm({ kind = "invoice", invoiceId, number, initi
                       aria-label={`Rate for line ${i + 1}`}
                       className={cellCls(err("rate"))}
                     />
+                  </label>
+                  <label>
+                    <span className={small}>Disc %</span>
                     <input
                       inputMode="decimal"
                       value={r.discountPercent}
@@ -284,6 +294,9 @@ export default function InvoiceForm({ kind = "invoice", invoiceId, number, initi
                       aria-label={`Discount for line ${i + 1}`}
                       className={cellCls(err("discountPercent"))}
                     />
+                  </label>
+                  <label>
+                    <span className={small}>GST %</span>
                     <input
                       inputMode="decimal"
                       value={r.gstPercent}
@@ -291,21 +304,25 @@ export default function InvoiceForm({ kind = "invoice", invoiceId, number, initi
                       aria-label={`GST for line ${i + 1}`}
                       className={cellCls(err("gstPercent"))}
                     />
-                    <div className="flex h-11 items-center justify-end text-base font-semibold">{formatINR(amount)}</div>
-                    <button
-                      type="button"
-                      onClick={() => setRows((rs) => rs.filter((x) => x.key !== r.key))}
-                      aria-label={`Remove line ${i + 1}`}
-                      className="flex h-11 items-center justify-center rounded-lg text-red-500 hover:bg-red-500/10"
-                    >
-                      <Trash2 className="h-[18px] w-[18px]" />
-                    </button>
+                  </label>
+                  <div className="col-span-2 flex h-11 items-center justify-between text-base font-semibold xl:col-span-1 xl:justify-end">
+                    <span className="text-sm font-normal text-muted-foreground xl:hidden">Amount</span>
+                    {formatINR(amount)}
                   </div>
-                  {rowErrors.length > 0 && <p className="mt-1 text-sm text-red-500">{rowErrors.join(" · ")}</p>}
+                  <button
+                    type="button"
+                    onClick={() => setRows((rs) => rs.filter((x) => x.key !== r.key))}
+                    aria-label={`Remove line ${i + 1}`}
+                    className="col-span-2 flex h-11 items-center justify-center gap-2 rounded-lg text-red-500 hover:bg-red-500/10 xl:col-span-1"
+                  >
+                    <Trash2 className="h-[18px] w-[18px]" />
+                    <span className="text-sm xl:hidden">Remove line</span>
+                  </button>
                 </div>
-              );
-            })}
-          </div>
+                {rowErrors.length > 0 && <p className="mt-1 text-sm text-red-500">{rowErrors.join(" · ")}</p>}
+              </div>
+            );
+          })}
         </div>
         {errors.items && <p className="mt-3 text-sm text-red-500">{errors.items}</p>}
 

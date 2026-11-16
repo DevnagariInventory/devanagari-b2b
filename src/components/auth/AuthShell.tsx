@@ -73,12 +73,12 @@ export default function AuthShell({ title, subtitle, children }: { title: string
 
       {/* Right: form card */}
       <main className="relative flex flex-1 items-center justify-center overflow-hidden px-4 py-10">
-        <div className="relative z-10 w-full max-w-[480px] rounded-3xl bg-white p-8 shadow-xl shadow-red-900/10 sm:p-10">
+        <div className="relative z-10 w-full max-w-[480px] rounded-3xl bg-white p-6 shadow-xl shadow-red-900/10 sm:p-10">
           <div className="flex flex-col items-center text-center">
             <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#9b111e] text-white">
               <BookOpen className="h-8 w-8" />
             </div>
-            <div className="mt-3 font-brand text-4xl font-bold text-[#5e0b13]">Devanagari</div>
+            <div className="mt-3 font-brand text-3xl font-bold text-[#5e0b13] sm:text-4xl">Devanagari</div>
             <div className="flex items-center gap-3 font-brand text-xl text-[#5e0b13]">
               <span className="h-px w-10 bg-red-600" />
               Prakashan
@@ -86,7 +86,7 @@ export default function AuthShell({ title, subtitle, children }: { title: string
             </div>
             <p className="mt-2 text-base text-slate-500">Book House Inventory System</p>
           </div>
-          <h1 className="mt-8 text-3xl font-bold text-slate-900">{title}</h1>
+          <h1 className="mt-6 text-2xl font-bold text-slate-900 sm:mt-8 sm:text-3xl">{title}</h1>
           <p className="mt-1 text-base text-slate-600">{subtitle}</p>
           <div className="mt-6">{children}</div>
         </div>

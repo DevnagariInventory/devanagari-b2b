@@ -44,7 +44,7 @@ export default function RoyaltyView({ rows, payments }: { rows: RoyaltyRow[]; pa
       <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
         <h2 className="mb-3 px-1 text-lg font-semibold">By author</h2>
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[860px] text-left text-base">
+          <table className="rtable w-full min-w-[860px] text-left text-base">
             <thead>
               <tr className="bg-muted text-sm uppercase tracking-wider text-muted-foreground">
                 {["Author", "Rate", "Copies sold", "Sales", "Royalty earned", "Paid", "Due"].map((h) => (
@@ -91,7 +91,7 @@ export default function RoyaltyView({ rows, payments }: { rows: RoyaltyRow[]; pa
       <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
         <h2 className="mb-3 px-1 text-lg font-semibold">Royalty payments</h2>
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[640px] text-left text-base">
+          <table className="rtable w-full min-w-[640px] text-left text-base">
             <thead>
               <tr className="bg-muted text-sm uppercase tracking-wider text-muted-foreground">
                 {["Date", "Author", "Mode", "Note", "Amount"].map((h) => (

@@ -1,7 +1,7 @@
 import { db } from "@/db";
 import { audit } from "@/db/audit";
 import {
-  auditLogs, authors, categories, challans, company, creditNoteItems, creditNotes, customers, expenses, invoiceItems,
+  auditLogs, authors, categories, company, customers, expenses, invoiceItems,
   invoices, payments, printOrders, printingPresses, productImages, products, quotationItems, quotations,
   royaltyPayments, stockMovements,
 } from "@/db/schema";
@@ -37,9 +37,6 @@ export async function GET() {
         printOrders: await tx.select().from(printOrders),
         quotations: await tx.select().from(quotations),
         quotationItems: await tx.select().from(quotationItems),
-        creditNotes: await tx.select().from(creditNotes),
-        creditNoteItems: await tx.select().from(creditNoteItems),
-        challans: await tx.select().from(challans),
         auditLogs: await tx.select().from(auditLogs),
         company: await tx.select().from(company),
       }),

@@ -8,7 +8,6 @@ import StatCard from "@/components/dashboard/StatCard";
 import { getProductDetail } from "@/db/products";
 import { formatDate } from "@/lib/date";
 import { formatINR } from "@/lib/format";
-import { MOVEMENT_LABEL } from "@/lib/labels";
 import { discountPercent } from "@/lib/media";
 import { isValidEan13, splitTags } from "@/lib/validation";
 
@@ -56,7 +55,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
         <span className="truncate text-foreground">{p.name}</span>
       </nav>
 
-      <div className="grid gap-8 lg:grid-cols-[auto_minmax(0,1fr)] lg:items-start">
+      <div className="grid gap-8 xl:grid-cols-[auto_minmax(0,1fr)] xl:items-start">
         <ProductGallery name={p.name} images={p.images.map((i) => i.path)} />
 
         <div className="space-y-5">
@@ -124,7 +123,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
         <StatCard label="Last sold" value={p.sales.lastSold ? formatDate(p.sales.lastSold) : "Never"} icon={Package} tone="purple" />
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-6 xl:grid-cols-2">
         <section className="rounded-2xl border border-border bg-card p-6 shadow-sm">
           <h2 className="text-xl font-semibold">About this book</h2>
           {p.description ? (
@@ -154,39 +153,13 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
         </section>
       </div>
 
-      <section className="rounded-2xl border border-border bg-card p-6 shadow-sm">
-        <h2 className="text-xl font-semibold">Recent stock activity</h2>
-        {p.movements.length === 0 ? (
-          <p className="mt-3 text-base text-muted-foreground">No stock changes recorded yet.</p>
-        ) : (
-          <div className="mt-3 overflow-x-auto">
-            <table className="w-full min-w-[520px] text-left text-base">
-              <thead>
-                <tr className="bg-muted text-sm uppercase tracking-wider text-muted-foreground">
-                  <th className="rounded-l-lg px-4 py-2.5 font-medium">Date</th>
-                  <th className="px-4 py-2.5 font-medium">Type</th>
-                  <th className="px-4 py-2.5 font-medium">Note</th>
-                  <th className="px-4 py-2.5 text-right font-medium">Change</th>
-                  <th className="rounded-r-lg px-4 py-2.5 text-right font-medium">Balance</th>
-                </tr>
-              </thead>
-              <tbody>
-                {p.movements.map((m) => (
-                  <tr key={m.id} className="border-b border-border last:border-0">
-                    <td className="whitespace-nowrap px-4 py-2.5">{formatDate(m.date)}</td>
-                    <td className="px-4 py-2.5">{MOVEMENT_LABEL[m.type] ?? m.type}</td>
-                    <td className="px-4 py-2.5 text-muted-foreground">{m.note || "—"}</td>
-                    <td className={`px-4 py-2.5 text-right font-semibold ${m.quantity > 0 ? "text-emerald-600" : "text-red-600"}`}>
-                      {m.quantity > 0 ? "+" : ""}{m.quantity}
-                    </td>
-                    <td className="px-4 py-2.5 text-right">{m.balance}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </section>
+      <p className="text-base text-muted-foreground">
+        Stock history for this book is in{" "}
+        <Link href={`/inventory?tab=history&q=${encodeURIComponent(p.name)}`} className="font-medium text-primary hover:underline">
+          Inventory → Movement history
+        </Link>
+        .
+      </p>
     </div>
   );
 }

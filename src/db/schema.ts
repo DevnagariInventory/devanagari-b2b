@@ -81,8 +81,6 @@ export const invoices = pgTable("invoices", {
   date: text("date").notNull(),
   total: doublePrecision("total").notNull(),
   paidAmount: doublePrecision("paid_amount").notNull().default(0),
-  /** Total of credit notes (returns) issued against this invoice. What the customer owes is total - credited - paid. */
-  creditedAmount: doublePrecision("credited_amount").notNull().default(0),
   paymentMode: text("payment_mode", { enum: ["cash", "upi", "bank", "cheque"] }).notNull().default("cash"),
   createdAt: text("created_at").notNull(),
 });
@@ -114,8 +112,6 @@ export const payments = pgTable("payments", {
   mode: text("mode", { enum: ["cash", "upi", "bank", "cheque"] }).notNull().default("cash"),
   reference: text("reference").notNull().default(""),
   note: text("note").notNull().default(""),
-  /** Set on a refund (negative amount) that was paid out because of a credit note. */
-  creditNoteId: integer("credit_note_id"),
   createdAt: text("created_at").notNull(),
 });
 
@@ -126,7 +122,7 @@ export const stockMovements = pgTable("stock_movements", {
     .notNull()
     .references(() => products.id, { onDelete: "cascade" }),
   type: text("type", {
-    enum: ["sale", "sale_edit", "sale_void", "purchase", "adjustment", "print_receipt", "return", "sale_return", "return_void"],
+    enum: ["sale", "sale_edit", "sale_void", "purchase", "adjustment", "print_receipt", "return"],
   }).notNull(),
   quantity: integer("quantity").notNull(), // signed: + adds stock, - removes it
   balance: integer("balance").notNull(),
@@ -228,43 +224,6 @@ export const users = pgTable("users", {
   createdAt: text("created_at").notNull(),
 }, (t) => [uniqueIndex("users_email_unique").on(t.email).where(sql`${t.email} <> ''`)]);
 
-// ---------- Credit notes (sales returns) ----------
-export const creditNotes = pgTable("credit_notes", {
-  id: serial("id").primaryKey(),
-  number: text("number").notNull().unique(),
-  invoiceId: integer("invoice_id")
-    .notNull()
-    .references(() => invoices.id, { onDelete: "restrict" }),
-  customerId: integer("customer_id")
-    .notNull()
-    .references(() => customers.id, { onDelete: "restrict" }),
-  date: text("date").notNull(),
-  reason: text("reason").notNull().default(""),
-  restock: boolean("restock").notNull().default(true), // false = damaged books, don't add them back to stock
-  total: doublePrecision("total").notNull(), // including GST
-  refundAmount: doublePrecision("refund_amount").notNull().default(0), // part of the total paid back to the customer
-  refundMode: text("refund_mode", { enum: ["cash", "upi", "bank", "cheque"] }).notNull().default("cash"),
-  createdBy: text("created_by").notNull().default(""),
-  createdAt: text("created_at").notNull(),
-});
-
-export const creditNoteItems = pgTable("credit_note_items", {
-  id: serial("id").primaryKey(),
-  creditNoteId: integer("credit_note_id")
-    .notNull()
-    .references(() => creditNotes.id, { onDelete: "cascade" }),
-  invoiceItemId: integer("invoice_item_id")
-    .notNull()
-    .references(() => invoiceItems.id, { onDelete: "restrict" }),
-  productId: integer("product_id")
-    .notNull()
-    .references(() => products.id, { onDelete: "restrict" }),
-  quantity: integer("quantity").notNull(),
-  unitPrice: doublePrecision("unit_price").notNull(), // as billed on the invoice (after discount)
-  gstPercent: doublePrecision("gst_percent").notNull().default(0),
-  lineTotal: doublePrecision("line_total").notNull(), // quantity * unitPrice, before GST
-});
-
 // ---------- Quotations ----------
 export const quotations = pgTable("quotations", {
   id: serial("id").primaryKey(),
@@ -296,25 +255,6 @@ export const quotationItems = pgTable("quotation_items", {
   gstPercent: doublePrecision("gst_percent").notNull().default(0),
   unitPrice: doublePrecision("unit_price").notNull(),
   lineTotal: doublePrecision("line_total").notNull(),
-});
-
-// ---------- Delivery challans ----------
-/** A dispatch note for an invoice's books. The lines are the invoice's lines, so they aren't stored again. */
-export const challans = pgTable("challans", {
-  id: serial("id").primaryKey(),
-  number: text("number").notNull().unique(),
-  invoiceId: integer("invoice_id")
-    .notNull()
-    .references(() => invoices.id, { onDelete: "cascade" }),
-  date: text("date").notNull(),
-  transporter: text("transporter").notNull().default(""),
-  vehicleNo: text("vehicle_no").notNull().default(""),
-  lrNumber: text("lr_number").notNull().default(""),
-  packages: integer("packages").notNull().default(0),
-  destination: text("destination").notNull().default(""),
-  notes: text("notes").notNull().default(""),
-  createdBy: text("created_by").notNull().default(""),
-  createdAt: text("created_at").notNull(),
 });
 
 export type Category = typeof categories.$inferSelect;

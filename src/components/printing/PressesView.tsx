@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Pencil, Plus, Search, Trash2 } from "lucide-react";
+import PrintingTabs from "./PrintingTabs";
 import Modal from "@/components/ui/Modal";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import DataForm, { type FieldDef } from "@/components/ui/DataForm";
@@ -39,15 +40,13 @@ export default function PressesView({ presses }: { presses: PressRow[] }) {
 
   return (
     <div className="space-y-6">
-      <PageHeader eyebrow="Production" title="Printing Press">
-        <Link href="/print-orders" className="flex h-11 items-center rounded-lg border border-border bg-card px-4 text-base font-medium hover:bg-muted">
-          View print orders
-        </Link>
+      <PageHeader eyebrow="Production" title="Printing">
         <button onClick={() => setDialog({ kind: "add" })} className={primaryBtn}>
           <Plus className="h-5 w-5" />
           Add Press
         </button>
       </PageHeader>
+      <PrintingTabs active="presses" />
 
       <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
         <div className="relative mb-4 max-w-[440px]">
@@ -55,7 +54,7 @@ export default function PressesView({ presses }: { presses: PressRow[] }) {
           <input type="search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search name, contact, mobile..." className={searchCls} />
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[820px] text-left text-base">
+          <table className="rtable w-full min-w-[820px] text-left text-base">
             <thead>
               <tr className="bg-muted text-sm uppercase tracking-wider text-muted-foreground">
                 {["Press", "Contact", "Mobile", "GSTIN", "Orders", "Spent"].map((h) => (

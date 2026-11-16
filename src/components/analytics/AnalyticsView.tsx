@@ -115,7 +115,7 @@ export default function AnalyticsView({ from: initialFrom, to: initialTo, data }
       </div>
 
       {tab === "Overview" ? (
-        <div className="grid gap-4 lg:grid-cols-2">
+        <div className="grid gap-4 xl:grid-cols-2">
           <ChartCard title="Payment Mode Split" height={260} empty={data.paymentModeSplit.length === 0}>
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>

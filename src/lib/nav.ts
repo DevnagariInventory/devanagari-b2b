@@ -1,39 +1,87 @@
 import {
-  LayoutDashboard, BarChart3, Users, BookOpen, PenTool, Tag, FileText,
-  Boxes, IndianRupee, Coins, Wallet, Printer, ClipboardList, LineChart,
-  ShieldCheck, Settings, FileSignature, Undo2, Truck, Hourglass, UserCog, type LucideIcon,
+  LayoutDashboard, BarChart3, Users, BookOpen, PenTool, Tag, FileText, Boxes, IndianRupee, Coins, Wallet, Printer,
+  LineChart, ShieldCheck, Settings, FileSignature, Hourglass, UserCog, ShoppingCart, Library, Factory, Landmark, Lock,
+  type LucideIcon,
 } from "lucide-react";
 import { canOpen, type Role } from "@/lib/auth/access";
 
-export interface NavItem {
+export interface NavLink {
   label: string;
   path: string;
   icon: LucideIcon;
 }
 
-export const navItems: NavItem[] = [
+/** A dropdown in the sidebar holding several pages. */
+export interface NavGroup {
+  label: string;
+  icon: LucideIcon;
+  items: NavLink[];
+}
+
+export type NavEntry = NavLink | NavGroup;
+export const isGroup = (e: NavEntry): e is NavGroup => "items" in e;
+
+export const navEntries: NavEntry[] = [
   { label: "Dashboard", path: "/", icon: LayoutDashboard },
-  { label: "Analytics", path: "/analytics", icon: BarChart3 },
-  { label: "Customers", path: "/customers", icon: Users },
-  { label: "Products", path: "/products", icon: BookOpen },
-  { label: "Authors", path: "/authors", icon: PenTool },
-  { label: "Categories", path: "/categories", icon: Tag },
-  { label: "Quotations", path: "/quotations", icon: FileSignature },
-  { label: "Invoices", path: "/invoices", icon: FileText },
-  { label: "Credit Notes", path: "/credit-notes", icon: Undo2 },
-  { label: "Delivery Challans", path: "/challans", icon: Truck },
-  { label: "Receivables", path: "/receivables", icon: Hourglass },
-  { label: "Inventory", path: "/inventory", icon: Boxes },
-  { label: "Payments", path: "/payments", icon: IndianRupee },
-  { label: "Royalty", path: "/royalty", icon: Coins },
-  { label: "Expenses", path: "/expenses", icon: Wallet },
-  { label: "Printing Press", path: "/printing-press", icon: Printer },
-  { label: "Print Orders", path: "/print-orders", icon: ClipboardList },
-  { label: "Reports", path: "/reports", icon: LineChart },
-  { label: "Audit Logs", path: "/audit-logs", icon: ShieldCheck },
-  { label: "Users", path: "/users", icon: UserCog },
-  { label: "Settings", path: "/settings", icon: Settings },
+  {
+    label: "Sales",
+    icon: ShoppingCart,
+    items: [
+      { label: "Customers", path: "/customers", icon: Users },
+      { label: "Quotations", path: "/quotations", icon: FileSignature },
+      { label: "Invoices", path: "/invoices", icon: FileText },
+      { label: "Receivables", path: "/receivables", icon: Hourglass },
+      { label: "Payments", path: "/payments", icon: IndianRupee },
+    ],
+  },
+  {
+    label: "Catalog & Stock",
+    icon: Library,
+    items: [
+      { label: "Products", path: "/products", icon: BookOpen },
+      { label: "Authors", path: "/authors", icon: PenTool },
+      { label: "Categories", path: "/categories", icon: Tag },
+      { label: "Inventory", path: "/inventory", icon: Boxes },
+    ],
+  },
+  {
+    label: "Production",
+    icon: Factory,
+    items: [
+      { label: "Printing", path: "/printing", icon: Printer },
+      { label: "Royalty", path: "/royalty", icon: Coins },
+    ],
+  },
+  {
+    label: "Finance",
+    icon: Landmark,
+    items: [
+      { label: "Expenses", path: "/expenses", icon: Wallet },
+      { label: "Analytics", path: "/analytics", icon: BarChart3 },
+      { label: "Reports", path: "/reports", icon: LineChart },
+    ],
+  },
+  {
+    label: "Admin",
+    icon: Lock,
+    items: [
+      { label: "Users", path: "/users", icon: UserCog },
+      { label: "Audit Logs", path: "/audit-logs", icon: ShieldCheck },
+      { label: "Settings", path: "/settings", icon: Settings },
+    ],
+  },
 ];
 
-/** The menu entries this role may open. */
-export const navFor = (role: Role) => navItems.filter((n) => canOpen(role, n.path));
+/** The menu this role may see: pages they can't open are dropped, and so are groups left empty. */
+export function navFor(role: Role): NavEntry[] {
+  const out: NavEntry[] = [];
+  for (const e of navEntries) {
+    if (isGroup(e)) {
+      const items = e.items.filter((n) => canOpen(role, n.path));
+      if (items.length) out.push({ ...e, items });
+    } else if (canOpen(role, e.path)) {
+      out.push(e);
+    }
+  }
+  return out;
+}

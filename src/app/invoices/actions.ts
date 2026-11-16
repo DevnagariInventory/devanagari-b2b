@@ -7,7 +7,7 @@ import { db } from "@/db";
 import { audit } from "@/db/audit";
 import { checkLines, insertInvoiceTx, lineRows } from "@/db/invoice-write";
 import { moveStock } from "@/db/stock";
-import { creditNotes, customers, invoiceItems, invoices } from "@/db/schema";
+import { customers, invoiceItems, invoices } from "@/db/schema";
 import { computeTotals } from "@/lib/invoice-math";
 import { parseInvoice, pickInvoiceRaw, type ActionResult, type CreateResult } from "@/lib/validation";
 import { FORM_ERROR } from "@/lib/validation";
@@ -47,17 +47,9 @@ export async function createInvoice(input: unknown): Promise<CreateResult> {
   }
 }
 
-async function hasCreditNotes(id: number) {
-  const [{ n }] = await db.select({ n: sql<number>`count(*)::int` }).from(creditNotes).where(eq(creditNotes.invoiceId, id));
-  return n > 0;
-}
-
-const HAS_CREDIT = "This invoice has credit notes (returns), so it can no longer be edited or deleted. Delete the credit notes first.";
-
 export async function updateInvoice(id: number, input: unknown): Promise<ActionResult> {
   const no = await denied("staff");
   if (no) return no;
-  if (await hasCreditNotes(id)) return { ok: false, errors: { [FORM_ERROR]: HAS_CREDIT } };
   const { errors, value } = parseInvoice(pickInvoiceRaw(input));
   if (Object.keys(errors).length) return { ok: false, errors };
 
@@ -115,7 +107,6 @@ export async function deleteInvoice(id: number): Promise<ActionResult> {
   if (no) return no;
   const [inv] = await db.select().from(invoices).where(eq(invoices.id, id));
   if (!inv) return { ok: false, errors: { [FORM_ERROR]: "This invoice no longer exists." } };
-  if (await hasCreditNotes(id)) return { ok: false, errors: { [FORM_ERROR]: HAS_CREDIT } };
 
   const items = await db.select().from(invoiceItems).where(eq(invoiceItems.invoiceId, id));
   await db.transaction(async (tx) => {

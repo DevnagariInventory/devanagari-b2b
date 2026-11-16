@@ -73,7 +73,7 @@ export default function UsersView({ users, meId }: { users: UserRow[]; meId: num
           records or see expenses, royalty, printing, reports, analytics, audit logs, settings or users.
         </p>
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[760px] text-left text-base">
+          <table className="rtable w-full min-w-[760px] text-left text-base">
             <thead>
               <tr className="bg-muted text-sm uppercase tracking-wider text-muted-foreground">
                 {["Name", "Username", "Email", "Role", "Status", "Last sign-in"].map((h) => (

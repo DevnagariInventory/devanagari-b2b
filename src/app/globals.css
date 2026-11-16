@@ -27,3 +27,62 @@
     @apply bg-background text-foreground font-sans antialiased;
   }
 }
+
+/* Phones: tables marked "rtable" become one card per row instead of scrolling sideways.
+   Column titles come from TableLabels (data-label on each cell). */
+@media (max-width: 639px) {
+  table.rtable,
+  table.rtable tbody {
+    display: block;
+    width: 100%;
+    min-width: 0 !important;
+  }
+  table.rtable thead {
+    display: none;
+  }
+  table.rtable tr {
+    display: block;
+    margin-bottom: 0.75rem;
+    padding: 0.5rem 0.875rem;
+    border: 1px solid hsl(var(--border));
+    border-radius: 0.875rem;
+    background: hsl(var(--card));
+  }
+  table.rtable td {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.4rem 0 !important;
+    text-align: right !important;
+    white-space: normal !important;
+    max-width: none !important;
+  }
+  table.rtable td::before {
+    content: attr(data-label);
+    flex-shrink: 0;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    text-align: left;
+    color: hsl(var(--muted-foreground));
+  }
+  table.rtable td[data-label=""]::before,
+  table.rtable td:not([data-label])::before {
+    display: none;
+  }
+  table.rtable td[colspan] {
+    display: block;
+    text-align: center !important;
+  }
+  /* the first cell (usually the name) leads the card, and the action buttons sit on their own row */
+  table.rtable td:first-child {
+    font-size: 1.05rem;
+    padding-bottom: 0.6rem !important;
+    border-bottom: 1px solid hsl(var(--border));
+    margin-bottom: 0.25rem;
+  }
+  table.rtable td:last-child:not(:first-child) {
+    padding-top: 0.6rem !important;
+  }
+}

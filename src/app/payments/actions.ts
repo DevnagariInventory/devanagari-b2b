@@ -15,7 +15,6 @@ const KEYS = ["amount", "date", "mode", "reference", "note"] as const;
 const refresh = () => revalidatePath("/", "layout");
 
 const round2 = (n: number) => Math.round(n * 100) / 100;
-const fail = (msg: string): ActionResult => ({ ok: false, errors: { [FORM_ERROR]: msg } });
 
 export async function addPayment(invoiceId: number, input: unknown): Promise<ActionResult> {
   const no = await denied("staff");
@@ -28,7 +27,7 @@ export async function addPayment(invoiceId: number, input: unknown): Promise<Act
     const [inv] = await tx.select().from(invoices).where(eq(invoices.id, invoiceId)).for("update");
     if (!inv) return { ok: false, errors: { [FORM_ERROR]: "This invoice no longer exists." } };
 
-    const balance = round2(inv.total - inv.creditedAmount - inv.paidAmount);
+    const balance = round2(inv.total - inv.paidAmount);
     if (value.amount > balance) {
       return {
         ok: false,
@@ -53,9 +52,6 @@ export async function deletePayment(id: number): Promise<ActionResult> {
   if (no) return no;
   const [pay] = await db.select().from(payments).where(eq(payments.id, id));
   if (!pay) return { ok: false, errors: { [FORM_ERROR]: "This payment no longer exists." } };
-  if (pay.creditNoteId !== null) {
-    return fail("This is a refund made for a credit note. Delete the credit note instead.");
-  }
   const [inv] = await db.select().from(invoices).where(eq(invoices.id, pay.invoiceId));
 
   await db.transaction(async (tx) => {

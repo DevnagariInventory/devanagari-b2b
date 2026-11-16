@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 
 interface Props {
@@ -19,18 +20,19 @@ export default function Modal({ open, title, onClose, children, wide }: Props) {
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
-  if (!open) return null;
+  if (!open || typeof document === "undefined") return null;
 
-  return (
+  // Drawn on <body> so it can't be trapped inside a parent (e.g. the header's blur effect) and always covers the screen.
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-3 sm:p-4"
       onMouseDown={(e) => e.target === e.currentTarget && onClose()}
     >
       <div
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className={`max-h-[90vh] w-full overflow-y-auto rounded-2xl border border-border bg-card p-6 shadow-xl ${
+        className={`max-h-[90vh] w-full overflow-y-auto rounded-2xl border border-border bg-card p-5 shadow-xl sm:p-6 ${
           wide ? "max-w-2xl" : "max-w-lg"
         }`}
       >
@@ -46,6 +48,7 @@ export default function Modal({ open, title, onClose, children, wide }: Props) {
         </div>
         {children}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

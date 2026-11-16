@@ -26,7 +26,7 @@ export async function getProductDetail(id: number) {
     .where(eq(products.id, id));
   if (!row) return null;
 
-  const [images, [sales], movements] = await Promise.all([
+  const [images, [sales]] = await Promise.all([
     getProductImages(id),
     db
       .select({
@@ -38,12 +38,6 @@ export async function getProductDetail(id: number) {
       .from(invoiceItems)
       .innerJoin(invoices, eq(invoices.id, invoiceItems.invoiceId))
       .where(eq(invoiceItems.productId, id)),
-    db
-      .select()
-      .from(stockMovements)
-      .where(eq(stockMovements.productId, id))
-      .orderBy(desc(stockMovements.id))
-      .limit(10),
   ]);
 
   return {
@@ -52,7 +46,6 @@ export async function getProductDetail(id: number) {
     categoryName: row.categoryName,
     images,
     sales,
-    movements,
   };
 }
 

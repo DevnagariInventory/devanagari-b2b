@@ -71,7 +71,7 @@ export function ProfitTab({ data }: { data: AnalyticsData }) {
         <StatCard label="Expenses" value={formatINR(data.totalExpenses)} icon={Receipt} tone="amber" />
         <StatCard label="Net profit" value={formatINR(s.profit)} icon={Percent} tone={s.profit >= 0 ? "green" : "purple"} hint={`${s.profitMargin}% margin`} />
       </div>
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid gap-4 xl:grid-cols-2">
         <ChartCard title="Revenue vs Expenses by Month" height={280} empty={data.monthlyProfit.length === 0}>
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data.monthlyProfit} margin={{ right: 16 }}>
@@ -122,7 +122,7 @@ export function BooksTab({ data }: { data: AnalyticsData }) {
           </BarChart>
         </ResponsiveContainer>
       </ChartCard>
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid gap-4 xl:grid-cols-2">
         <ListCard
           title="Not selling (dead stock)"
           headers={["Book", "Stock", "Value"]}
@@ -178,7 +178,7 @@ export function OperationsTab({ data }: { data: AnalyticsData }) {
         <StatCard label="Open print orders" value={String(o.openPrintOrders)} icon={Printer} tone="purple" hint={`${o.copiesOnOrder.toLocaleString("en-IN")} copies`} />
         <StatCard label="Outstanding" value={formatINR(data.summary.outstanding)} icon={Clock} tone="amber" />
       </div>
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid gap-4 xl:grid-cols-2">
         <ChartCard title="Payments Received by Month" height={260} empty={data.monthlyCollections.length === 0}>
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data.monthlyCollections} margin={{ right: 16 }}>

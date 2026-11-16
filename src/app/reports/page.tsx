@@ -64,7 +64,7 @@ export default async function ReportsPage({
         </p>
 
         <div className="mt-4 overflow-x-auto">
-          <table className="w-full min-w-[720px] text-left text-base">
+          <table className="rtable w-full min-w-[720px] text-left text-base">
             <thead>
               <tr className="bg-muted text-sm uppercase tracking-wider text-muted-foreground">
                 {report.columns.map((c) => (

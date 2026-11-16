@@ -4,6 +4,7 @@ import { daysAgo, today } from "@/lib/date";
 
 export const metadata = { title: "Analytics · Devanagari Prakashan" };
 export const dynamic = "force-dynamic";
+export const maxDuration = 30; // seconds; analytics runs many queries
 
 const ISO = /^\d{4}-\d{2}-\d{2}$/;
 

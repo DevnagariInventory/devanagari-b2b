@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { CheckCircle2, ClipboardList, Hourglass, IndianRupee, Pencil, Plus, Printer, Search, Trash2, XCircle } from "lucide-react";
+import PrintingTabs from "./PrintingTabs";
 import Modal from "@/components/ui/Modal";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import DataForm, { type FieldDef } from "@/components/ui/DataForm";
@@ -88,15 +89,13 @@ export default function PrintOrdersView({ orders, presses, products }: Props) {
 
   return (
     <div className="space-y-6">
-      <PageHeader eyebrow="Production" title="Print Orders">
-        <Link href="/printing-press" className="flex h-11 items-center rounded-lg border border-border bg-card px-4 text-base font-medium hover:bg-muted">
-          Printing presses
-        </Link>
+      <PageHeader eyebrow="Production" title="Printing">
         <button onClick={() => setDialog({ kind: "add" })} className={primaryBtn}>
           <Plus className="h-5 w-5" />
           New Print Order
         </button>
       </PageHeader>
+      <PrintingTabs active="orders" />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard label="Open orders" value={String(stats.open)} icon={ClipboardList} tone="blue" />
@@ -121,7 +120,7 @@ export default function PrintOrdersView({ orders, presses, products }: Props) {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[1000px] text-left text-base">
+          <table className="rtable w-full min-w-[1000px] text-left text-base">
             <thead>
               <tr className="bg-muted text-sm uppercase tracking-wider text-muted-foreground">
                 {["Order", "Book", "Press", "Copies", "Cost", "Dates", "Status"].map((h) => (

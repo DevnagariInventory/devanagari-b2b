@@ -4,7 +4,7 @@ export type Role = "admin" | "staff";
 
 /** Pages only an admin may open. Everything else is open to any signed-in user. */
 export const ADMIN_ONLY_PREFIXES = [
-  "/analytics", "/royalty", "/expenses", "/printing-press", "/print-orders",
+  "/analytics", "/royalty", "/expenses", "/printing", "/printing-press", "/print-orders",
   "/reports", "/audit-logs", "/settings", "/users",
 ];
 

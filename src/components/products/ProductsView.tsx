@@ -177,7 +177,7 @@ export default function ProductsView({
           </div>
         ) : (
           <div className="mt-4 overflow-x-auto">
-            <table className="w-full min-w-[960px] text-left text-base">
+            <table className="rtable w-full min-w-[960px] text-left text-base">
               <thead>
                 <tr className="bg-muted text-sm uppercase tracking-wider text-muted-foreground">
                   {["Book", "SKU", "ISBN", "Category", "Price", "GST", "Stock"].map((h) => (

@@ -46,7 +46,7 @@ export default async function QuotationsPage({ searchParams }: { searchParams: P
           )}
         </form>
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[760px] text-left text-base">
+          <table className="rtable w-full min-w-[760px] text-left text-base">
             <thead>
               <tr className="bg-muted text-sm uppercase tracking-wider text-muted-foreground">
                 {["Quotation", "Customer", "Date", "Valid until", "Total", "Status"].map((h) => (
